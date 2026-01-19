@@ -1,31 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Absensi QR</title>
-<style>
-body { font-family: Arial; margin:0; padding:20px; }
-button { width:100%; padding:15px; font-size:18px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Embed Web App Google Apps Script</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f9f9f9;
+      text-align: center;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+    iframe {
+      border: 1px solid #ccc;
+      width: 100%;
+      height: 600px;
+    }
+    .btn-open {
+      margin: 12px 0;
+      padding: 10px 20px;
+      background: #4285F4;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 4px;
+    }
+    .btn-open:hover {
+      background: #3367D6;
+    }
+  </style>
 </head>
 <body>
-<h2>Absensi QR Code</h2>
-<input id="nip" placeholder="NIP"><br><br>
-<button onclick="login()">Login</button>
+  <h1>Google Apps Script Web App</h1>
 
+  <!-- Tombol untuk buka di tab baru -->
+  <button class="btn-open" onclick="openWebApp()">
+    Buka di Tab Baru
+  </button>
 
-<script>
-const API = 'https://script.google.com/macros/s/AKfycbwn3IXVokaf2o42zcSG8aTCj7FWwL7pd2Yd9Oe6USnOWcA5z6vDUQhbGjOD-88KwvKgSw/exec';
-const device_id = localStorage.device_id || crypto.randomUUID();
-localStorage.device_id = device_id;
+  <!-- Frame yang menampilkan web app Anda -->
+  <iframe 
+    src="https://script.google.com/macros/s/AKfycbwTTGswM8rDExh2RTwsZ5PWxfAaPMwLmZ3dedftaWuPLA3GnMhbh7FpxBDB43wwrE8W/exec"
+    frameborder="0"
+    allowfullscreen>
+  </iframe>
 
-
-function login() {
-fetch(API, {
-method:'POST',
-body: JSON.stringify({action:'login', nip: nip.value, device_id})
-}).then(r=>r.json()).then(d=>alert(d.message));
-}
-</script>
+  <script>
+    function openWebApp() {
+      window.open(
+        "https://script.google.com/macros/s/AKfycbwTTGswM8rDExh2RTwsZ5PWxfAaPMwLmZ3dedftaWuPLA3GnMhbh7FpxBDB43wwrE8W/exec",
+        "_blank"
+      );
+    }
+  </script>
 </body>
 </html>

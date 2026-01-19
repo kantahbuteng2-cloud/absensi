@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sistem Absensi QR Code</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .header {
+            background: linear-gradient(to right, #4a6fa5, #3b5998);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        /* Form Styles */
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+        
+        .form-group input {
+            padding: 15px;
+            border: 2px solid #e1e5eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #4a6fa5;
+        }
+        
+        .btn {
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #4a6fa5, #3b5998);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 111, 165, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e1e5eb;
+        }
+        
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+        
+        /* QR Scanner Page */
+        #scanner-page {
+            display: none;
+        }
+        
+        .scanner-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        #reader {
+            width: 100%;
+            height: 300px;
+            border: 3px solid #4a6fa5;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .user-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #4a6fa5;
+        }
+        
+        .user-info h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .info-item {
+            font-size: 0.9rem;
+        }
+        
+        .info-item .label {
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .info-item .value {
+            color: #333;
+        }
+        
+        .scan-result {
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+        
+        .scan-result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .scan-result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .scan-result.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+        }
+        
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4a6fa5;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            #reader {
+                height: 250px;
+            }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login/Register Page -->
+        <div id="login-page">
+            <div class="header">
+                <h1><i class="fas fa-qrcode"></i> ABSENSI QR CODE</h1>
+                <p>Sistem Absensi Digital</p>
+            </div>
+            
+            <div class="content">
+                <div class="form-container">
+                    <div class="form-group">
+                        <label for="nip"><i class="fas fa-id-card"></i> NIP</label>
+                        <input type="text" id="nip" placeholder="Masukkan NIP Anda">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="login()">
+                        <i class="fas fa-sign-in-alt"></i> MASUK
+                    </button>
+                    
+                    <div class="form-group">
+                        <p style="text-align: center; color: #666;">ATAU</p>
+                    </div>
+                    
+                    <button class="btn btn-secondary" onclick="showRegister()">
+                        <i class="fas fa-user-plus"></i> DAFTAR PERANGKAT BARU
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Register Page -->
+        <div id="register-page" class="hidden">
+            <div class="header">
+                <h1><i class="fas fa-mobile-alt"></i> DAFTAR PERANGKAT</h1>
+                <p>Registrasi perangkat baru</p>
+            </div>
+            
+            <div class="content">
+                <div class="form-container">
+                    <div class="form-group">
+                        <label for="reg-nip"><i class="fas fa-id-card"></i> NIP</label>
+                        <input type="text" id="reg-nip" placeholder="Masukkan NIP">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="registerDevice()">
+                        <i class="fas fa-check"></i> DAFTARKAN PERANGKAT
+                    </button>
+                    
+                    <button class="btn btn-secondary" onclick="showLogin()">
+                        <i class="fas fa-arrow-left"></i> KEMBALI
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- QR Scanner Page -->
+        <div id="scanner-page">
+            <button class="logout-btn" onclick="logout()" title="Keluar">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+            
+            <div class="header">
+                <h1><i class="fas fa-camera"></i> SCAN QR CODE</h1>
+                <p id="current-time">--:--:--</p>
+            </div>
+            
+            <div class="content">
+                <div class="scanner-container">
+                    <div class="user-info">
+                        <h3><i class="fas fa-user"></i> INFORMASI PEGAWAI</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="label">NIP</div>
+                                <div class="value" id="user-nip">-</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="label">NAMA</div>
+                                <div class="value" id="user-name">-</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="label">JABATAN</div>
+                                <div class="value" id="user-position">-</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="label">DEVICE ID</div>
+                                <div class="value" id="user-device">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="reader"></div>
+                    
+                    <div id="scan-result" class="scan-result">
+                        <h3 id="result-title"></h3>
+                        <p id="result-message"></p>
+                    </div>
+                    
+                    <div id="loading" class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Memproses absensi...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+        // Konfigurasi GAS
+        const SCRIPT_ID = '1yCNScPfWNGwxoHpCpqIfDyIv7W-xjj0r6V2G7lwOEMs';
+        const GAS_URL = `https://script.google.com/macros/s/${SCRIPT_ID}/exec`;
+        
+        // State aplikasi
+        let currentUser = null;
+        let currentDeviceId = null;
+        let scanner = null;
+        
+        // Generate Device ID
+        function generateDeviceId() {
+            return 'DEV-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        }
+        
+        // Update waktu real-time
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('id-ID');
+            const dateString = now.toLocaleDateString('id-ID', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            const timeElement = document.getElementById('current-time');
+            if (timeElement) {
+                timeElement.innerHTML = `${dateString}<br>${timeString}`;
+            }
+        }
+        
+        // Navigasi antar halaman
+        function showLogin() {
+            document.getElementById('login-page').classList.remove('hidden');
+            document.getElementById('register-page').classList.add('hidden');
+            document.getElementById('scanner-page').classList.add('hidden');
+        }
+        
+        function showRegister() {
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('register-page').classList.remove('hidden');
+            document.getElementById('scanner-page').classList.add('hidden');
+        }
+        
+        function showScanner() {
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('register-page').classList.add('hidden');
+            document.getElementById('scanner-page').classList.remove('hidden');
+            updateUserInfo();
+        }
+        
+        // Login dengan NIP
+        async function login() {
+            const nip = document.getElementById('nip').value.trim();
+            
+            if (!nip) {
+                alert('Silakan masukkan NIP');
+                return;
+            }
+            
+            try {
+                showLoading(true);
+                
+                // Cek apakah device sudah terdaftar
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'login',
+                        nip: nip
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentUser = result.user;
+                    currentDeviceId = result.deviceId;
+                    localStorage.setItem('absensi_user', JSON.stringify(currentUser));
+                    localStorage.setItem('absensi_device', currentDeviceId);
+                    
+                    // Inisialisasi QR Scanner
+                    initQRScanner();
+                    showScanner();
+                } else {
+                    alert(result.message || 'NIP tidak ditemukan atau device belum terdaftar');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Terjadi kesalahan saat login');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // Daftar device baru
+        async function registerDevice() {
+            const nip = document.getElementById('reg-nip').value.trim();
+            
+            if (!nip) {
+                alert('Silakan masukkan NIP');
+                return;
+            }
+            
+            try {
+                showLoading(true);
+                
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'register',
+                        nip: nip
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Device berhasil didaftarkan! Silakan login dengan NIP Anda.');
+                    showLogin();
+                    document.getElementById('nip').value = nip;
+                } else {
+                    alert(result.message || 'Gagal mendaftarkan device');
+                }
+            } catch (error) {
+                console.error('Register error:', error);
+                alert('Terjadi kesalahan saat pendaftaran');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // Inisialisasi QR Scanner
+        function initQRScanner() {
+            if (scanner) {
+                scanner.clear();
+            }
+            
+            scanner = new Html5Qrcode("reader");
+            
+            const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+                scanner.pause();
+                processQRScan(decodedText);
+            };
+            
+            const config = { 
+                fps: 10,
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0
+            };
+            
+            scanner.start(
+                { facingMode: "environment" },
+                config,
+                qrCodeSuccessCallback
+            ).catch(err => {
+                console.error("QR Scanner error:", err);
+                alert("Tidak dapat mengakses kamera. Pastikan izin kamera telah diberikan.");
+            });
+        }
+        
+        // Proses hasil scan QR
+        async function processQRScan(qrData) {
+            const resultDiv = document.getElementById('scan-result');
+            const resultTitle = document.getElementById('result-title');
+            const resultMessage = document.getElementById('result-message');
+            
+            try {
+                showLoading(true);
+                resultDiv.classList.add('hidden');
+                
+                // Validasi format QR
+                if (!qrData.includes('APEL_')) {
+                    showResult('error', 'QR Code Tidak Valid', 'Format QR Code tidak dikenali');
+                    setTimeout(() => scanner.resume(), 3000);
+                    return;
+                }
+                
+                const absenType = qrData; // APEL_PAGI atau APEL_SORE
+                const now = new Date();
+                const today = now.toISOString().split('T')[0];
+                const time = now.toTimeString().split(' ')[0];
+                
+                // Kirim data absensi ke GAS
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'absen',
+                        nip: currentUser.nip,
+                        nama: currentUser.nama,
+                        tanggal: today,
+                        waktu: time,
+                        jenis_absen: absenType,
+                        device_id: currentDeviceId
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult('success', 'Absensi Berhasil', result.message);
+                } else {
+                    showResult(result.type || 'error', 'Absensi Gagal', result.message);
+                }
+                
+            } catch (error) {
+                console.error('Absen error:', error);
+                showResult('error', 'Kesalahan Sistem', 'Terjadi kesalahan saat memproses absensi');
+            } finally {
+                showLoading(false);
+                setTimeout(() => {
+                    resultDiv.classList.add('hidden');
+                    scanner.resume();
+                }, 3000);
+            }
+        }
+        
+        // Tampilkan hasil scan
+        function showResult(type, title, message) {
+            const resultDiv = document.getElementById('scan-result');
+            const resultTitle = document.getElementById('result-title');
+            const resultMessage = document.getElementById('result-message');
+            
+            resultDiv.className = `scan-result ${type}`;
+            resultTitle.textContent = title;
+            resultMessage.textContent = message;
+            resultDiv.classList.remove('hidden');
+        }
+        
+        // Update info pengguna
+        function updateUserInfo() {
+            if (currentUser) {
+                document.getElementById('user-nip').textContent = currentUser.nip;
+                document.getElementById('user-name').textContent = currentUser.nama;
+                document.getElementById('user-position').textContent = currentUser.jabatan;
+                document.getElementById('user-device').textContent = currentDeviceId;
+            }
+        }
+        
+        // Logout
+        function logout() {
+            if (scanner) {
+                scanner.stop().catch(() => {});
+            }
+            
+            currentUser = null;
+            currentDeviceId = null;
+            localStorage.removeItem('absensi_user');
+            localStorage.removeItem('absensi_device');
+            
+            showLogin();
+        }
+        
+        // Tampilkan loading
+        function showLoading(show) {
+            const loadingDiv = document.getElementById('loading');
+            if (show) {
+                loadingDiv.classList.remove('hidden');
+            } else {
+                loadingDiv.classList.add('hidden');
+            }
+        }
+        
+        // Cek login saat load
+        window.onload = function() {
+            // Update clock setiap detik
+            setInterval(updateClock, 1000);
+            updateClock();
+            
+            // Cek session yang tersimpan
+            const savedUser = localStorage.getItem('absensi_user');
+            const savedDevice = localStorage.getItem('absensi_device');
+            
+            if (savedUser && savedDevice) {
+                currentUser = JSON.parse(savedUser);
+                currentDeviceId = savedDevice;
+                initQRScanner();
+                showScanner();
+            } else {
+                showLogin();
+            }
+            
+            // Preload device ID jika belum ada
+            if (!localStorage.getItem('device_id')) {
+                localStorage.setItem('device_id', generateDeviceId());
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Absensi</title>
+<style>
+body{font-family:Arial;padding:10px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #ccc;padding:8px;font-size:14px}
+th{background:#eee}
+</style>
+</head>
+<body>
+<h3>Rekap Absensi Hari Ini</h3>
+<table id="tbl">
+<tr><th>NIP</th><th>Nama</th><th>Pagi</th><th>Sore</th></tr>
+</table>
+<script>
+const API='URL_WEBAPP_GAS';
+fetch(API,{method:'POST',body:JSON.stringify({action:'rekap'})})
+.then(r=>r.json()).then(d=>{
+const t=document.getElementById('tbl');
+d.data.forEach(r=>{
+t.innerHTML+=`<tr><td>${r.nip}</td><td>${r.nama}</td><td>${r.pagi}</td><td>${r.sore}</td></tr>`
+})
+});
+</script>
+</body>
+</html>
